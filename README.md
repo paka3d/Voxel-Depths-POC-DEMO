@@ -1,5 +1,6 @@
 # VOXEL DEPTHS — POC DEMO - 
-
+**Built for learning and exploring HTML / ThreeJS - seeing how qwen 3.8 27b tackled this **
+P.H.C 2026
 
 Testing a voxel-based isometric roguelite dungeon crawler built with Three.js. You descend through three procedurally generated floating terraces, fight creatures, solve environmental puzzles, and survive the abyss.
 
@@ -388,5 +389,5 @@ VOXELDEPTHS emphasizes:
 
 *VOXELDEPTHS — A voxel isometric roguelite*
 
-**Built with love for the art of exploration, survival, and discovery.**
+**Built for learning and exploring deeper HTML / ThreeJS / vfx **
 P.H.C 2026
