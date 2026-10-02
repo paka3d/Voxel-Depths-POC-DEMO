@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <title>VOXELDEPTHS — a voxel isometric dungeon crawler</title>
 <style>
   :root{
@@ -10,7 +12,8 @@
     --ink:#cdd3e4; --dim:#8b93ad; --panel:rgba(10,12,22,.82);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{width:100%;height:100%;overflow:hidden;background:#05060c;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#05060c;
+    touch-action:none;overscroll-behavior:none;}
   body{font-family:ui-monospace,'Cascadia Mono','JetBrains Mono',Consolas,monospace;color:var(--ink);
        -webkit-user-select:none;user-select:none;}
   #app{position:fixed;inset:0;}
@@ -117,6 +120,54 @@
     letter-spacing:.15em;opacity:0;transition:opacity .4s;text-shadow:0 0 12px rgba(70,213,194,.6);pointer-events:none;}
   @media (max-width:900px){ #hud{min-width:220px;transform:scale(.88);transform-origin:top left;}
     #minimap{transform:scale(.85);transform-origin:top right;} }
+  /* ---------- touch controls ---------- */
+  .tctl{display:none;}
+  body.touch .tctl{display:flex;}
+  body.touch #keys{display:none;}
+  body.touch #minimap{top:64px;}
+  body.touch #hint{bottom:188px;}
+  @supports (padding: env(safe-area-inset-bottom)){
+    body.touch #minimap{top:calc(64px + env(safe-area-inset-top));}
+  }
+  #joy{position:fixed;left:22px;bottom:26px;z-index:15;width:132px;height:132px;border-radius:50%;
+    pointer-events:auto;touch-action:none;cursor:default;
+    background:radial-gradient(circle at 50% 42%, rgba(22,27,48,.82), rgba(9,11,20,.55) 62%, rgba(9,11,20,.18) 76%, transparent 79%);
+    border:1px solid rgba(120,140,220,.4);
+    box-shadow:0 0 0 5px rgba(120,140,220,.07), inset 0 0 24px rgba(70,213,194,.10);
+    transition:box-shadow .2s;}
+  #joy.on{box-shadow:0 0 0 5px rgba(120,140,220,.12), 0 0 30px rgba(70,213,194,.22), inset 0 0 30px rgba(70,213,194,.18);}
+  .joydir{position:absolute;width:0;height:0;opacity:.55;border-style:solid;}
+  .jd-n{left:50%;top:calc(50% - 22px);transform:translateX(-50%);
+    border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #7f8cc9;}
+  .jd-s{left:50%;top:calc(50% + 14px);transform:translateX(-50%);
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid #7f8cc9;}
+  .jd-e{left:calc(50% + 14px);top:50%;transform:translateY(-50%);
+    border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid #7f8cc9;}
+  .jd-w{left:calc(50% - 22px);top:50%;transform:translateY(-50%);
+    border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid #7f8cc9;}
+  #stick{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%, #f7e2a8, #d9a83e 58%, #8a6420);
+    box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 0 1px #6b5522, inset 0 1px 2px rgba(255,255,255,.5);
+    will-change:transform;}
+  .tbtn{position:relative;z-index:15;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;
+    display:flex;align-items:center;justify-content:center;border-radius:50%;user-select:none;-webkit-user-select:none;
+    background:radial-gradient(circle at 50% 38%, rgba(30,38,68,.92), rgba(12,15,28,.88));
+    border:1px solid #2c3556;color:var(--ink);
+    font-family:inherit;font-size:20px;letter-spacing:0;line-height:1;
+    box-shadow:0 6px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+    transition:transform .06s ease, box-shadow .15s, background .15s;}
+  .tbtn:active{transform:scale(.93);}
+  #btnatk{right:24px;bottom:30px;width:82px;height:82px;font-size:30px;color:#ffd76a;border-color:#6b5522;
+    box-shadow:0 6px 18px rgba(0,0,0,.5), 0 0 16px rgba(232,182,76,.25), inset 0 1px 0 rgba(255,255,255,.12);}
+  #btnatk.on{background:radial-gradient(circle at 50% 38%, #f4d98a, #d9a83e 60%, #8a6420);color:#241a05;box-shadow:0 0 24px rgba(232,182,76,.55);}
+  #btndash{right:118px;bottom:40px;width:60px;height:60px;font-size:22px;color:var(--teal);border-color:#1f5c55;}
+  #btnpause{position:fixed;top:10px;right:12px;width:44px;height:44px;font-size:16px;letter-spacing:2px;}
+  @supports (padding: env(safe-area-inset-bottom)){
+    #joy{left:calc(22px + env(safe-area-inset-left));bottom:calc(26px + env(safe-area-inset-bottom));}
+    #btnatk{right:calc(24px + env(safe-area-inset-right));bottom:calc(30px + env(safe-area-inset-bottom));}
+    #btndash{right:calc(118px + env(safe-area-inset-right));bottom:calc(40px + env(safe-area-inset-bottom));}
+    #btnpause{top:calc(10px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));}
+  }
 </style>
 <script type="importmap">
 {
@@ -177,6 +228,15 @@
   <span><b>ESC</b>pause</span><span><b>`</b>cam&nbsp;debug</span>
   <button id="dbgtoggle" type="button" title="Toggle camera debug panel ( backquote key )">&#9881;&nbsp;CAM</button>
 </div>
+<!-- touch controls (shown on touch devices) -->
+<div id="joy" class="tctl" aria-label="move joystick">
+  <span class="joydir jd-n"></span><span class="joydir jd-s"></span>
+  <span class="joydir jd-e"></span><span class="joydir jd-w"></span>
+  <div id="stick"></div>
+</div>
+<button id="btndash" class="tctl tbtn" aria-label="dash">&#10148;</button>
+<button id="btnatk" class="tctl tbtn" aria-label="strike">&#9876;</button>
+<button id="btnpause" class="tctl tbtn" aria-label="pause">&#10074;&#10074;</button>
 <div id="hint"></div>
 <div id="floorcard"><div class="d" id="fc-d">DEPTH 1</div><h2 id="fc-h">THE SHATTERED TERRACES</h2><p id="fc-p"></p></div>
 
@@ -190,6 +250,7 @@
     <button class="btn" id="startbtn">Enter the Depths</button>
   </div>
   <div class="sub" style="margin-top:26px;font-size:11px">WASD move &nbsp;·&nbsp; SPACE strike &nbsp;·&nbsp; SHIFT dash &nbsp;·&nbsp; ESC pause</div>
+  <div class="sub tctl" style="margin-top:14px;font-size:11px">hold left to steer &nbsp;·&nbsp; tap &#9876; to strike &nbsp;·&nbsp; tap &#10148; to dash</div>
 </div>
 
 <div class="overlay" id="dead">
@@ -1396,6 +1457,24 @@ addEventListener('keydown', e=>{
   if(e.code==='ShiftLeft'||e.code==='ShiftRight'){ tryDash(); }
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
+// ---------------- touch input ----------------
+const touch = { jx:0, jz:0, autoAtk:false };
+function readMoveInput(){
+  let dx=0, dz=0;
+  if(keys['KeyW']||keys['ArrowUp']) dz-=1;
+  if(keys['KeyS']||keys['ArrowDown']) dz+=1;
+  if(keys['KeyA']||keys['ArrowLeft']) dx-=1;
+  if(keys['KeyD']||keys['ArrowRight']) dx+=1;
+  dx += touch.jx; dz += touch.jz;
+  const l = Math.hypot(dx,dz);
+  if(l>0){ if(l>1){ dx/=l; dz/=l; } return { dx, dz, mag:Math.min(1,l), active:true }; }
+  return { dx:0, dz:0, mag:0, active:false };
+}
+function enableTouchUI(){
+  if(document.body.classList.contains('touch')) return;
+  document.body.classList.add('touch');
+  try{ window.AudioContext = window.AudioContext || window.webkitAudioContext; }catch(e){}
+}
 renderer.domElement.addEventListener('mousedown', e=>{ if(e.button===0) tryAttack(); if(e.button===2) tryDash(); });
 renderer.domElement.addEventListener('contextmenu', e=>e.preventDefault());
 
@@ -1408,6 +1487,77 @@ function setMode(m){
 }
 
 document.getElementById('startbtn').onclick = ()=>{ AudioFX.init(); newRun(); }
+
+// ---------------- touch controls ----------------
+enableTouchUI();
+{
+  const $ = id=>document.getElementById(id);
+  const joy = $('joy'), stick = $('stick'), atk = $('btnatk');
+  let joyId = null;
+  const joyR = ()=> (joy.offsetWidth/2) * 0.55;
+  const joyApply = e=>{
+    const r = joy.getBoundingClientRect();
+    const R = joyR();
+    let dx = e.clientX - (r.left + r.width/2);
+    let dy = e.clientY - (r.top + r.height/2);
+    const l = Math.hypot(dx,dy);
+    if(l > R){ dx *= R/l; dy *= R/l; }
+    stick.style.transform = 'translate('+dx+'px,'+dy+'px)';
+    let nx = dx/R, ny = dy/R;
+    const m = Math.hypot(nx,ny);
+    if(m < 0.12){ nx = 0; ny = 0; }
+    else if(m > 1){ nx/=m; ny/=m; }
+    // screen-space -> world-space: the isometric camera sits at +x/+z,
+    // so screen-right is world (+x,-z) and screen-up is world (-x,-z)
+    const K = Math.SQRT1_2;
+    touch.jx = K*(nx + ny);
+    touch.jz = K*(-nx + ny);
+  };
+  const joyRelease = e=>{
+    if(e.pointerId !== joyId) return;
+    joyId = null;
+    touch.jx = 0; touch.jz = 0;
+    stick.style.transform = '';
+    joy.classList.remove('on');
+  };
+  joy.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    if(joyId !== null) return;
+    joyId = e.pointerId;
+    try{ joy.setPointerCapture(e.pointerId); }catch(_){}
+    joy.classList.add('on');
+    joyApply(e);
+  });
+  joy.addEventListener('pointermove', e=>{ if(joyId === e.pointerId) joyApply(e); });
+  joy.addEventListener('pointerup', joyRelease);
+  joy.addEventListener('pointercancel', joyRelease);
+  joy.addEventListener('lostpointercapture', joyRelease);
+  const bindBtn = (el, down, up)=>{
+    el.addEventListener('pointerdown', e=>{
+      e.preventDefault();
+      try{ el.setPointerCapture(e.pointerId); }catch(_){}
+      if(down) down(e);
+    });
+    const rel = e=>{ if(up) up(e); };
+    el.addEventListener('pointerup', rel);
+    el.addEventListener('pointercancel', rel);
+    el.addEventListener('contextmenu', e=>e.preventDefault());
+  };
+  bindBtn(atk, ()=>{ touch.autoAtk = true; atk.classList.add('on'); tryAttack(); },
+                     ()=>{ touch.autoAtk = false; atk.classList.remove('on'); });
+  bindBtn($('btndash'), ()=> tryDash());
+  bindBtn($('btnpause'), ()=>{
+    if(state.mode==='play') setMode('pause');
+    else if(state.mode==='pause') setMode('play');
+  });
+  // touch-capable laptops: reveal the pad the moment a finger lands
+  if(!document.body.classList.contains('touch')){
+    addEventListener('touchstart', enableTouchUI, { once:true, capture:true, passive:true });
+  }
+  // kill iOS pinch-zoom & double-tap zoom
+  document.addEventListener('gesturestart', e=>e.preventDefault());
+  document.addEventListener('dblclick', e=>e.preventDefault());
+}
 
 // ---------------- debug camera (F4) ----------------
 // NOTE: declared before the ?shot capture block below — that path calls tick()
@@ -1586,12 +1736,8 @@ function tryDash(){
   const p = state.player;
   if(p.dashCd>0 || p.falling) return;
   p.dashT = 0; p.dashCd = 0.85; p.iframes = Math.max(p.iframes, 0.28);
-  let dx=0, dz=0;
-  if(keys['KeyW']||keys['ArrowUp']) dz-=1;
-  if(keys['KeyS']||keys['ArrowDown']) dz+=1;
-  if(keys['KeyA']||keys['ArrowLeft']) dx-=1;
-  if(keys['KeyD']||keys['ArrowRight']) dx+=1;
-  if(dx||dz){ const l=Math.hypot(dx,dz); p.dashDir={x:dx/l, z:dz/l}; }
+  const iv = readMoveInput();
+  if(iv.active) p.dashDir = { x:iv.dx, z:iv.dz };
   else p.dashDir = { x:Math.sin(p.facing), z:Math.cos(p.facing) };
   AudioFX.dash();
 }
@@ -2126,15 +2272,12 @@ function updatePlayer(dt){
   p.dashCd = Math.max(0, p.dashCd-dt);
   p.portalCd = Math.max(0, p.portalCd-dt);
 
-  // input
-  let dx=0, dz=0;
-  if(keys['KeyW']||keys['ArrowUp']) dz-=1;
-  if(keys['KeyS']||keys['ArrowDown']) dz+=1;
-  if(keys['KeyA']||keys['ArrowLeft']) dx-=1;
-  if(keys['KeyD']||keys['ArrowRight']) dx+=1;
-  const len = Math.hypot(dx,dz);
-  p.moving = len>0;
-  if(len>0){ dx/=len; dz/=len; }
+  // input (keyboard + touch joystick)
+  const iv = readMoveInput();
+  p.moving = iv.active;
+
+  // auto-strike while the touch strike button is held
+  if(touch.autoAtk && state.mode==='play' && p.attackT<0 && !p.falling) tryAttack();
 
   // dash
   if(p.dashT >= 0){
@@ -2146,10 +2289,11 @@ function updatePlayer(dt){
       collideMove(f, p, nx, nz);
       if(Math.random()<0.8) burst(playerModel.position.clone().add(new THREE.Vector3(0,0.7,0)), 0x7fa8ff, 2, 0.5, 0.3, 0.1, -0.5);
     } else p.dashT = -1;
-  } else if(len>0){
-    const nx = p.x + dx*PLAYER_SPEED*dt, nz = p.z + dz*PLAYER_SPEED*dt;
+  } else if(iv.active){
+    const sp = PLAYER_SPEED * Math.max(0.4, iv.mag); // analog: stick deflection = speed
+    const nx = p.x + iv.dx*sp*dt, nz = p.z + iv.dz*sp*dt;
     collideMove(f, p, nx, nz);
-    p.facing = Math.atan2(dx, dz);
+    p.facing = Math.atan2(iv.dx, iv.dz);
   }
 
   // ground: height / pit / platform
